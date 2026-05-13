@@ -22,6 +22,16 @@ def test_yesterday():
     assert parse("yesterday", today=date(2026, 5, 13)) == date(2026, 5, 12)
 
 
+def test_day_after_tomorrow():
+    assert parse("the day after tomorrow", today=date(2026, 5, 13)) == date(2026, 5, 15)
+
+
+def test_day_before_yesterday():
+    assert parse("the day before yesterday", today=date(2026, 5, 13)) == date(
+        2026, 5, 11
+    )
+
+
 def test_in_3_days():
     assert parse("in 3 days", today=date(2026, 5, 13)) == date(2026, 5, 16)
 
@@ -138,6 +148,14 @@ def test_combined_offsets():
 def test_month_and_year_clamping():
     assert parse("1 month after January 31, 2025") == date(2025, 2, 28)
     assert parse("1 year after February 29, 2024") == date(2025, 2, 28)
+
+
+def test_next_month_phrase():
+    assert parse("next month", today=date(2026, 1, 31)) == date(2026, 2, 28)
+
+
+def test_last_year_phrase():
+    assert parse("last year", today=date(2024, 2, 29)) == date(2023, 2, 28)
 
 
 def test_invalid_inputs_raise_value_error():

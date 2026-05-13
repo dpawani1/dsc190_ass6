@@ -101,6 +101,22 @@ _QUALIFIED_WEEKDAY_RE = re.compile(
     r"^(?P<direction>next|last|this)\s+(?P<weekday>[a-z]+)$"
 )
 _OFFSET_PART_RE = re.compile(rf"^(?P<amount>.+?)\s+(?P<unit>{_UNIT_PATTERN})$")
+_PHRASE_RELATIVE_OFFSETS: dict[str, tuple[int, str]] = {
+    "the day after tomorrow": (2, "day"),
+    "day after tomorrow": (2, "day"),
+    "the day before yesterday": (-2, "day"),
+    "day before yesterday": (-2, "day"),
+    "the week after next": (2, "week"),
+    "week after next": (2, "week"),
+    "the week before last": (-2, "week"),
+    "week before last": (-2, "week"),
+    "next week": (1, "week"),
+    "last week": (-1, "week"),
+    "next month": (1, "month"),
+    "last month": (-1, "month"),
+    "next year": (1, "year"),
+    "last year": (-1, "year"),
+}
 
 
 def parse(s: str, today: date | None = None) -> date:
@@ -120,6 +136,9 @@ def _parse_normalized(s: str, today: date) -> date:
         return today + timedelta(days=1)
     if s == "yesterday":
         return today - timedelta(days=1)
+    if s in _PHRASE_RELATIVE_OFFSETS:
+        amount, unit = _PHRASE_RELATIVE_OFFSETS[s]
+        return _apply_single_offset(today, amount, unit)
 
     qualified_weekday_match = _QUALIFIED_WEEKDAY_RE.fullmatch(s)
     if qualified_weekday_match is not None:
