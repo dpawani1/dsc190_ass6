@@ -35,6 +35,30 @@ def test_absolute_date():
     assert parse("December 1st, 2025") == date(2025, 12, 1)
 
 
+def test_absolute_date_with_slashes():
+    assert parse("2025/12/04") == date(2025, 12, 4)
+
+
+def test_absolute_date_with_dashes():
+    assert parse("2025-12-04") == date(2025, 12, 4)
+
+
+def test_month_day_year_with_slashes():
+    assert parse("12/04/2025") == date(2025, 12, 4)
+
+
+def test_single_digit_month_day_year_with_slashes():
+    assert parse("1/4/2025") == date(2025, 1, 4)
+
+
+def test_month_day_year_with_dashes():
+    assert parse("12-04-2025") == date(2025, 12, 4)
+
+
+def test_single_digit_month_day_year_with_dashes():
+    assert parse("1-4-2025") == date(2025, 1, 4)
+
+
 def test_days_before_date():
     assert parse("5 days before December 1st, 2025") == date(2025, 11, 26)
 

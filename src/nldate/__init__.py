@@ -57,16 +57,19 @@ _NUMBER_WORDS: dict[str, int] = {
 }
 
 _UNIT_PATTERN = r"(?:day|days|week|weeks|month|months|year|years)"
-_OFFSET_PART_RE = re.compile(
-    rf"(?P<amount>\d+|[a-z]+)\s+(?P<unit>{_UNIT_PATTERN})"
-)
+_OFFSET_PART_RE = re.compile(rf"(?P<amount>\d+|[a-z]+)\s+(?P<unit>{_UNIT_PATTERN})")
 _BEFORE_AFTER_RE = re.compile(
-    rf"^(?P<offsets>.+?)\s+(?P<direction>before|after|from)\s+(?P<base>.+)$"
+    r"^(?P<offsets>.+?)\s+(?P<direction>before|after|from)\s+(?P<base>.+)$"
 )
-_IN_RE = re.compile(rf"^in\s+(?P<offsets>.+)$")
-_AGO_RE = re.compile(rf"^(?P<offsets>.+)\s+ago$")
+_IN_RE = re.compile(r"^in\s+(?P<offsets>.+)$")
+_AGO_RE = re.compile(r"^(?P<offsets>.+)\s+ago$")
 _WEEKDAY_RE = re.compile(r"^(?P<direction>next|last)\s+(?P<weekday>[a-z]+)$")
-_ISO_DATE_RE = re.compile(r"^(?P<year>\d{4})-(?P<month>\d{2})-(?P<day>\d{2})$")
+_YEAR_FIRST_DATE_RE = re.compile(
+    r"^(?P<year>\d{4})[-/](?P<month>\d{2})[-/](?P<day>\d{2})$"
+)
+_YEAR_LAST_DATE_RE = re.compile(
+    r"^(?P<month>\d{1,2})[-/](?P<day>\d{1,2})[-/](?P<year>\d{4})$"
+)
 _MONTH_NAME_DATE_RE = re.compile(
     r"^(?P<month>[a-z]+)\s+(?P<day>\d{1,2}),\s*(?P<year>\d{4})$"
 )
@@ -122,9 +125,7 @@ def _normalize(s: str) -> str:
     return normalized
 
 
-def _parse_relative_weekday(
-    today: date, direction: str, weekday_name: str
-) -> date:
+def _parse_relative_weekday(today: date, direction: str, weekday_name: str) -> date:
     try:
         target_weekday = _WEEKDAYS[weekday_name]
     except KeyError as exc:
@@ -147,12 +148,20 @@ def _parse_relative_weekday(
 
 
 def _parse_absolute_date(s: str) -> date:
-    iso_match = _ISO_DATE_RE.fullmatch(s)
-    if iso_match is not None:
+    year_first_match = _YEAR_FIRST_DATE_RE.fullmatch(s)
+    if year_first_match is not None:
         return date(
-            year=int(iso_match.group("year")),
-            month=int(iso_match.group("month")),
-            day=int(iso_match.group("day")),
+            year=int(year_first_match.group("year")),
+            month=int(year_first_match.group("month")),
+            day=int(year_first_match.group("day")),
+        )
+
+    year_last_match = _YEAR_LAST_DATE_RE.fullmatch(s)
+    if year_last_match is not None:
+        return date(
+            year=int(year_last_match.group("year")),
+            month=int(year_last_match.group("month")),
+            day=int(year_last_match.group("day")),
         )
 
     month_name_match = _MONTH_NAME_DATE_RE.fullmatch(s)
@@ -203,9 +212,7 @@ def _canonical_unit(unit: str) -> str:
     return unit
 
 
-def _apply_offset(
-    base: date, offsets: list[tuple[int, str]], sign: int
-) -> date:
+def _apply_offset(base: date, offsets: list[tuple[int, str]], sign: int) -> date:
     result = base
     for amount, unit in offsets:
         result = _apply_single_offset(result, amount * sign, unit)
