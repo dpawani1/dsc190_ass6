@@ -39,8 +39,16 @@ def test_absolute_date_with_slashes():
     assert parse("2025/12/04") == date(2025, 12, 4)
 
 
+def test_single_digit_day_year_first_with_slashes():
+    assert parse("2025/12/3") == date(2025, 12, 3)
+
+
 def test_absolute_date_with_dashes():
     assert parse("2025-12-04") == date(2025, 12, 4)
+
+
+def test_single_digit_month_day_year_first_with_dashes():
+    assert parse("2025-1-3") == date(2025, 1, 3)
 
 
 def test_month_day_year_with_slashes():
@@ -49,6 +57,10 @@ def test_month_day_year_with_slashes():
 
 def test_single_digit_month_day_year_with_slashes():
     assert parse("1/4/2025") == date(2025, 1, 4)
+
+
+def test_single_digit_month_day_year_with_slashes_requested_case():
+    assert parse("1/3/2025") == date(2025, 1, 3)
 
 
 def test_month_day_year_with_dashes():

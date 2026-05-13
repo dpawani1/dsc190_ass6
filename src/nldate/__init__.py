@@ -65,7 +65,7 @@ _IN_RE = re.compile(r"^in\s+(?P<offsets>.+)$")
 _AGO_RE = re.compile(r"^(?P<offsets>.+)\s+ago$")
 _WEEKDAY_RE = re.compile(r"^(?P<direction>next|last)\s+(?P<weekday>[a-z]+)$")
 _YEAR_FIRST_DATE_RE = re.compile(
-    r"^(?P<year>\d{4})[-/](?P<month>\d{2})[-/](?P<day>\d{2})$"
+    r"^(?P<year>\d{4})[-/](?P<month>\d{1,2})[-/](?P<day>\d{1,2})$"
 )
 _YEAR_LAST_DATE_RE = re.compile(
     r"^(?P<month>\d{1,2})[-/](?P<day>\d{1,2})[-/](?P<year>\d{4})$"
